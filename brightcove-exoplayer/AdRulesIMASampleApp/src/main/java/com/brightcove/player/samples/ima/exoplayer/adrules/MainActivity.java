@@ -46,6 +46,8 @@ public class MainActivity extends BrightcovePlayer {
     private GoogleIMAComponent googleIMAComponent;
     private String adRulesURL = "http://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=%2F15018773%2Feverything2&ciu_szs=300x250%2C468x60%2C728x90&impl=s&gdfp_req=1&env=vp&output=xml_vast2&unviewed_position_start=1&url=dummy&correlator=[timestamp]&cmsid=133&vid=10XWSh7W4so&ad_rule=1";
 
+    private String QMIAds = "https://pubads.g.doubleclick.net/gampad/live/ads?sz=640x480&iu=%2F7548%2FGTVA_TVA_TVARATTRAPAGE_FR_WEB&gdfp_req=1&env=vp&output=xml_vast3&ad_rule=1&cmsid=2457919&vid=5735137400001&pp=tvar&hl=fr&unviewed_position_start=1&url=tv.accedo.ott.flow.tva.quebecor&description_url=%7Bwindow.location.href%7D&correlator=[timestamp]&cust_params=video_duration%3D5945774%26plID%3D%7Bplayer.id%7D%26ttID%3D5735137400001%26adrequestorigin%3DAppGrid&ms=4pcbjfTck7xkDK0X-vwxDeDquHsggLqYU9RNvfBIT_LgVREmiAHwqkz-_dLfS8DonfwkJM_nRJlgrv2HCCH2s6cRza0KxFBVoHrExztJUB7w-nNNonz8aC_9fe6zI15NXMl1xIh8hgzerZfYJ7uea7Vz7tq7l_xERWBmgBZk9ece4xtsBeCBOud1Fj5Q-9iqi8ETqQzHBuH83HpOx5WycKPLx5QxUGyNjFrdrJbGue8VG6zeVYFoQMPqSk-ZkqL5I7f9Q5vuN5LZrdg0Hs1oKTeSQrrOWlSHM_h28PQyun2sUUXN_v4-R5MZ5Ybkbvl2zI2JdNViy0bl5HDg5_poZQ&sdkv=h.3.45.0%2Fn.android.3.5.2%2Ftv.accedo.ott.flow.tva.quebecor&sdki=405&scor=2813831996324712&js=ima-android.3.5.2&msid=tv.accedo.ott.flow.tva.quebecor&an=tv.accedo.ott.flow.tva.quebecor&mv=80892400.com.android.vending&u_so=l&osd=2&frm=0&sdr=1&is_amp=0";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // When extending the BrightcovePlayer, we must assign the BrightcoveExoPlayerVideoView before
@@ -63,12 +65,13 @@ public class MainActivity extends BrightcovePlayer {
         // Use a procedural abstraction to setup the Google IMA SDK via the plugin.
         setupGoogleIMA();
 
-        Catalog catalog = new Catalog(eventEmitter, getString(R.string.account), getString(R.string.policy));
-        catalog.findVideoByID(getString(R.string.videoId), new VideoListener() {
+        Catalog catalog = new Catalog(eventEmitter, "5567732451001", "BCpkADawqM3aVEOsSraCT-9rth_21TtVmTLmpg-T5JXcNLciCmzMM4LpRy7RqAToUeIj6NMWLk5o2M645WcxlDvLRVH4tM6tOM__hlGECiXVft6h9xD4GzEURwAmRmVj7wHbK0PUlw8nn5mA");
+        catalog.findVideoByID("5662702213001", new VideoListener() {
             public void onVideo(Video video) {
                 brightcoveVideoView.add(video);
 
                 // Auto play: the GoogleIMAComponent will postpone
+
                 // playback until the Ad Rules are loaded.
                 brightcoveVideoView.start();
             }
@@ -124,7 +127,7 @@ public class MainActivity extends BrightcovePlayer {
                 // Build an ads request object and point it to the ad
                 // display container created above.
                 AdsRequest adsRequest = sdkFactory.createAdsRequest();
-                adsRequest.setAdTagUrl(adRulesURL);
+                adsRequest.setAdTagUrl(QMIAds);
                 adsRequest.setAdDisplayContainer(container);
 
                 ArrayList<AdsRequest> adsRequests = new ArrayList<AdsRequest>(1);
