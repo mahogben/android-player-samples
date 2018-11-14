@@ -6,16 +6,23 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.brightcove.player.controller.NoSourceFoundException;
+import com.brightcove.player.edge.Catalog;
+import com.brightcove.player.edge.VideoListener;
 import com.brightcove.player.event.EventEmitter;
 import com.brightcove.player.event.EventListener;
 import com.brightcove.player.event.EventType;
 import com.brightcove.player.event.Event;
 
+import com.brightcove.player.model.Video;
 import com.brightcove.player.view.BrightcovePlayer;
 import com.brightcove.player.view.BrightcoveExoPlayerVideoView;
 
 import com.brightcove.onceux.OnceUxComponent;
 import com.brightcove.onceux.event.OnceUxEventType;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This app illustrates how to use the Once UX plugin to ensure that:
@@ -36,6 +43,12 @@ public class MainActivity extends BrightcovePlayer {
 
     private final String TAG = this.getClass().getSimpleName();
 
+    private String accountID = "5567732451001";
+    private String videoID  =  "5676756058001";
+    private String ad_config_id = "0065f90a-19bf-40a1-acde-082d65166c31";
+    private String policyKey = "BCpkADawqM3PIXlPKFoF3J6ygbV02JWu-scu5IJJzITxhaCpMMi_XFonqY8ye1Qv4PEnM63tEkvl7hGt11CzpLY3ZA_cJ9bAyiWfvczcquhcN2-r27NhPwlCC3CQGLqHp7eytiD4Kbko7sN9";
+
+
     // Private instance variables
 
     // The OnceUX plugin VMAP data URL, which tells the plugin when to
@@ -50,6 +63,8 @@ public class MainActivity extends BrightcovePlayer {
         return plugin;
     }
 
+    private EventEmitter eventEmitter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // When extending the BrightcovePlayer, we must assign brightcoveVideoView before
@@ -60,18 +75,35 @@ public class MainActivity extends BrightcovePlayer {
         brightcoveVideoView.getAnalytics().setAccount("5420904993001");
         super.onCreate(savedInstanceState);
 
+        eventEmitter = brightcoveVideoView.getEventEmitter();
+
         // Setup the event handlers for the OnceUX plugin, set the companion ad container,
         // register the VMAP data URL inside the plugin and start the video.  The plugin will
         // detect that the video has been started and pause it until the ad data is ready or an
         // error condition is detected.  On either event the plugin will continue playing the
         // video.
         registerEventHandlers();
+
+
         plugin = new OnceUxComponent(this, brightcoveVideoView);
-        View view = findViewById(R.id.ad_frame);
-        if (view != null && view instanceof ViewGroup) {
-            plugin.addCompanionContainer((ViewGroup) view);
-        }
-        plugin.processVideo(onceUxAdDataUrl);
+
+        final Map<String, String> parameters = new HashMap<>();
+        parameters.put("ad_config_id", ad_config_id);
+
+        plugin = new OnceUxComponent(this, brightcoveVideoView);
+
+        Catalog catalog = new Catalog(eventEmitter, accountID, policyKey);
+
+        catalog.findVideoByID(videoID, null, parameters, new VideoListener() {
+            @Override
+            public void onVideo(Video video) {
+                try {
+                    plugin.processVideo(video);
+                } catch(NoSourceFoundException e) {
+
+                }
+            }
+        });
    }
 
     // Private instance methods
@@ -81,7 +113,6 @@ public class MainActivity extends BrightcovePlayer {
      */
     private void registerEventHandlers() {
         // Handle the case where the ad data URL has not been supplied to the plugin.
-        EventEmitter eventEmitter = brightcoveVideoView.getEventEmitter();
         eventEmitter.on(OnceUxEventType.NO_AD_DATA_URL, new EventListener() {
             @Override
             public void processEvent(Event event) {
@@ -92,3 +123,19 @@ public class MainActivity extends BrightcovePlayer {
         });
     }
 }
+
+
+/*
+SOME USEFUL METHODS
+
+    Adding params to a VMAP URL:
+    public static void addVMAPQueryParams(Video video, String vmapQuery){
+        Map<DeliveryType,SourceCollection> map = video.getSourceCollections();
+        for (SourceCollection sourceCollection : map.values()) {
+            for (Source s : sourceCollection.getSources()) {
+                String full = (s.getProperties().get(Source.Fields.VMAP)).toString().concat(vmapQuery);
+                s.getProperties().put(Source.Fields.VMAP, full);
+            }
+        }
+    }
+ */

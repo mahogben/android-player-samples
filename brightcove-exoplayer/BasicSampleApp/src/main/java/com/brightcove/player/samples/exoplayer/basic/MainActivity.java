@@ -48,3 +48,33 @@ public class MainActivity extends BrightcovePlayer {
         });
     }
 }
+
+
+/*
+SOME USEFUL METHODS:
+
+
+    public static Video addingToSourceURL(String appending, Video video) {
+        String newUrl = null;
+        Source newSource = null;
+        SourceCollection newSourceCollection = null;
+        DeliveryType tempDelivery = null;
+
+        for (SourceCollection sourceCollection : video.getSourceCollections().values()){
+            Set<Source> set =  sourceCollection.getSources();
+            tempDelivery = sourceCollection.getDeliveryType();
+            for (Source s : set){
+                newUrl = s.getUrl() + appending;
+            }
+            newSource = new Source (newUrl, tempDelivery);
+            newSourceCollection = new SourceCollection(newSource, tempDelivery);
+        }
+        video.getSourceCollections().clear();
+        video.getSourceCollections().put(tempDelivery, newSourceCollection);
+
+        return video;
+    }
+
+
+
+ */
