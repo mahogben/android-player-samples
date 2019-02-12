@@ -80,7 +80,7 @@ public class MainActivity extends BrightcovePlayer {
         registerEventHandlers();
         plugin = new OnceUxComponent(this, brightcoveVideoView);
 
-        catalog.findVideoByID(videoID, new VideoListener() {
+        catalog.findVideoByID(videoID, null, parameters, new VideoListener() {
             @Override
             public void onVideo(Video video) {
                 try {
