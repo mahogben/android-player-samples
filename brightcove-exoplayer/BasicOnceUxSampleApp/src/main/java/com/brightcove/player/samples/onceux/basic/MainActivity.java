@@ -6,16 +6,23 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.brightcove.player.controller.NoSourceFoundException;
+import com.brightcove.player.edge.Catalog;
+import com.brightcove.player.edge.VideoListener;
 import com.brightcove.player.event.EventEmitter;
 import com.brightcove.player.event.EventListener;
 import com.brightcove.player.event.EventType;
 import com.brightcove.player.event.Event;
 
+import com.brightcove.player.model.Video;
 import com.brightcove.player.view.BrightcovePlayer;
 import com.brightcove.player.view.BrightcoveExoPlayerVideoView;
 
 import com.brightcove.onceux.OnceUxComponent;
 import com.brightcove.onceux.event.OnceUxEventType;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This app illustrates how to use the Once UX plugin to ensure that:
@@ -43,7 +50,12 @@ public class MainActivity extends BrightcovePlayer {
     // what the click through URL for the ads shoud be.  The VMAP data
     // will also identify what the companion ad should be and what
     // it's click through URL is.
-    private String onceUxAdDataUrl = "http://once.unicornmedia.com/now/ads/vmap/od/auto/c501c3ee-7f1c-4020-aa6d-0b1ef0bbd4a9/202ef8bb-0d9d-4f6f-bd18-f45aa3010fe6/8a146f45-9fac-462e-a111-de60ec96198b/content.once";
+    //private String onceUxAdDataUrl = "http://once.unicornmedia.com/now/ads/vmap/od/auto/c501c3ee-7f1c-4020-aa6d-0b1ef0bbd4a9/202ef8bb-0d9d-4f6f-bd18-f45aa3010fe6/8a146f45-9fac-462e-a111-de60ec96198b/content.once";
+
+    private String accountID = "";
+    private String videoID  =  "";
+    private String ad_config_id = "";
+    private String policyKey = "";
 
     private OnceUxComponent plugin;
     public OnceUxComponent getOnceUxPlugin() {
@@ -57,22 +69,30 @@ public class MainActivity extends BrightcovePlayer {
         // management.
         setContentView(R.layout.onceux_activity_main);
         brightcoveVideoView = (BrightcoveExoPlayerVideoView) findViewById(R.id.brightcove_video_view);
-        brightcoveVideoView.getAnalytics().setAccount("5420904993001");
+        brightcoveVideoView.getAnalytics().setAccount(accountID);
         super.onCreate(savedInstanceState);
 
-        // Setup the event handlers for the OnceUX plugin, set the companion ad container,
-        // register the VMAP data URL inside the plugin and start the video.  The plugin will
-        // detect that the video has been started and pause it until the ad data is ready or an
-        // error condition is detected.  On either event the plugin will continue playing the
-        // video.
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("ad_config_id", ad_config_id);
+
+        Catalog catalog = new Catalog(brightcoveVideoView.getEventEmitter(), accountID, policyKey);
+
         registerEventHandlers();
         plugin = new OnceUxComponent(this, brightcoveVideoView);
-        View view = findViewById(R.id.ad_frame);
-        if (view != null && view instanceof ViewGroup) {
-            plugin.addCompanionContainer((ViewGroup) view);
-        }
-        plugin.processVideo(onceUxAdDataUrl);
-   }
+
+        catalog.findVideoByID(videoID, new VideoListener() {
+            @Override
+            public void onVideo(Video video) {
+                try {
+                    plugin.processVideo(video);
+                } catch (NoSourceFoundException e) {
+                    brightcoveVideoView.add(video);
+                }
+            }
+        });
+        //For use with ONCE
+        //plugin.processVideo(onceUxAdDataUrl);
+    }
 
     // Private instance methods
 
